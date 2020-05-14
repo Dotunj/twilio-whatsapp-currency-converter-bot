@@ -3,7 +3,6 @@
 use App\CurrencyConverterClient;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class CurrencySeeder extends Seeder
 {
@@ -16,13 +15,11 @@ class CurrencySeeder extends Seeder
     {
         $currencies = $client->getSupportedCurrencies();
 
-        Log::info('Getting Currencies');
-
         foreach ($currencies as $currency => $key) {
             foreach ($key as $k) {
                 DB::table('currencies')->insert([
-                    'currency_name' => $k['currencyName'],
-                    'currency_code' => $k['id']
+                    'name' => $k['currencyName'],
+                    'code' => $k['id']
                 ]);
             }
         }

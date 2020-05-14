@@ -8,6 +8,6 @@ class Currency extends Model
 {
     public static function findByCurrencyCode(array $items)
     {
-        return static::whereIn('currency_code', $items)->get();
+        return static::whereIn('code', $items)->get();
     }
 }

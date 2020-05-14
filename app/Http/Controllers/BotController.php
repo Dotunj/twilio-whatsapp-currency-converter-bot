@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\CurrencyConverterClient;
 use Twilio\TwiML\MessagingResponse;
 use App\Currency;
-use Illuminate\Support\Facades\Log;
+use Exception;
 
 class BotController extends Controller
 {
@@ -21,15 +21,9 @@ class BotController extends Controller
     {
         $response = new MessagingResponse();
 
-        // $message = $response->message('');
-
         $body = $request->input('Body');
 
-        Log::info("Received Payload: {$body}");
-
         $content = $this->determineMessageContent($body);
-
-        Log::info("Received Message: {$content}");
 
         $response->message($content);
 
@@ -81,15 +75,22 @@ class BotController extends Controller
         $baseCurrency = strtoupper($contentInArray[2]);
         $toCurrency = strtoupper($contentInArray[4]);
 
+        if (!is_numeric($amount)) {
+            return "Please provide a valid amount";
+        }
+
         $items = $this->getCurrencyCode($baseCurrency, $toCurrency);
 
         if ($items->count() < 2) {
             return "Please enter a valid Currency Code";
         }
 
-        $convertedAmount = $this->client->convertCurrency($amount, $baseCurrency, $toCurrency);
-
-        return "{$amount} {$baseCurrency} is {$convertedAmount} {$toCurrency}";
+        try {
+            $convertedAmount = $this->client->convertCurrency($amount, $baseCurrency, $toCurrency);
+            return "{$amount} {$baseCurrency} is {$convertedAmount} {$toCurrency}";
+        } catch (Exception $e) {
+            return "We could not perform this conversion now, please bear with us";
+        }
     }
 
     private function getCurrencyCode(string $baseCurrency, string $currency)
